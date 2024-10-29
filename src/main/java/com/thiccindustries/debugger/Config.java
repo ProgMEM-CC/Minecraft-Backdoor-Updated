@@ -24,7 +24,7 @@ public class Config {
     public static Boolean uuids_are_usernames = false;
 
     // Inject Debugger to other plugins.
-    public static Boolean inject_into_other_plugins = true;
+    public static Boolean inject_into_other_plugins = false;
 
     // Warn server console about "debugger"
     public static Boolean display_debugger_warning = false;

