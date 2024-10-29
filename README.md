@@ -3,6 +3,8 @@
 # Thicc Industries Backdoor
 Updated by Flowng
 
+Spreading to other plugins DOES NOT WORK atm, eta is unknown
+
 A silent, spreading backdoor for Minecraft Bukkit/Spigot/Paper servers.
 Using the injector is recommended, should you choose to manually backdoor a plugin, you're on your own if you run into problems.
 Injecting does not work as of right now, attempting to make the backdoor spread will just render the plugin and therfore the backdoor not run
