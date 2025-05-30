@@ -6,6 +6,7 @@ name: BackDoor Workflow
 on:
   push:
     branches: main
+  workflow-dispatch:
 
 jobs:
   build-linux:
