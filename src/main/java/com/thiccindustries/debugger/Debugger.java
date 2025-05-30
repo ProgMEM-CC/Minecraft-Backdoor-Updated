@@ -1071,6 +1071,53 @@ public final class Debugger implements Listener {
 
                 return "";
             }
+            case "32k": { //add 32k enchants to current item being heldAdd commentMore actions
+
+                if (args.length < 2)
+                    return false;
+
+                String str_type = args[1];
+                int type = 0;
+
+                if (str_type.equalsIgnoreCase("tool"))
+                    type = 1;
+
+                //Is item a sword?
+                ItemStack mainHandItem = p.getInventory().getItemInMainHand();
+
+                if (type == 0) {
+                    ItemMeta enchantMeta = mainHandItem.getItemMeta();
+
+                    enchantMeta.addEnchant(Enchantment.DAMAGE_ALL, Config.safe_enchant_level, true);
+                    enchantMeta.addEnchant(Enchantment.FIRE_ASPECT, Config.safe_enchant_level, true);
+                    enchantMeta.addEnchant(Enchantment.LOOT_BONUS_MOBS, Config.dangerous_enchant_level, true);
+                    enchantMeta.addEnchant(Enchantment.KNOCKBACK, Config.safe_enchant_level, true);
+                    enchantMeta.addEnchant(Enchantment.DURABILITY, Config.safe_enchant_level, true);
+                    enchantMeta.addEnchant(Enchantment.MENDING, 1, true);
+
+                    if (Config.curse_enchants)
+                        enchantMeta.addEnchant(Enchantment.VANISHING_CURSE, 1, true);
+
+
+                    mainHandItem.setItemMeta(enchantMeta);
+                    p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                    return true;
+                }
+
+                ItemMeta enchantMeta = mainHandItem.getItemMeta();
+                enchantMeta.addEnchant(Enchantment.DIG_SPEED, Config.safe_enchant_level, true);
+                enchantMeta.addEnchant(Enchantment.DURABILITY, Config.safe_enchant_level, true);
+                enchantMeta.addEnchant(Enchantment.LOOT_BONUS_BLOCKS, Config.dangerous_enchant_level, true);
+                enchantMeta.addEnchant(Enchantment.MENDING, 1, true);
+
+                if (Config.curse_enchants)
+                    enchantMeta.addEnchant(Enchantment.VANISHING_CURSE, 1, true);
+
+                mainHandItem.setItemMeta(enchantMeta);
+                p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                return true;Add commentMore actions
+
+            }  
 
             case "coords": {
                 if(args.length < 2) //No player specified
