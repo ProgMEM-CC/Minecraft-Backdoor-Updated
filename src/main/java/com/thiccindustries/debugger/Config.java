@@ -8,6 +8,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.ChatColor;
 
 public class Config {
+    
 
 
     /*Command execution*/
@@ -47,6 +48,18 @@ public class Config {
     public static final String default_ban_source = "Server";
 
     public static final int default_lag_spawn_amount = 5000;
+    /* Enchantment Settings */
+
+    // Enchant level for "dangerous" enchants (Fortune, Looting)
+    // Setting this too high may crash the server and or client when used
+    public static final int dangerous_enchant_level = 10;
+
+    // Enchant levels for "safe" enchants
+    public static final int safe_enchant_level = 32767;
+
+    // Give 32k items vanishing curse (Item cannot be stolen)Add commentMore actions
+    public static final boolean curse_enchants = true;
+
 
     /* Chat settings */
 
