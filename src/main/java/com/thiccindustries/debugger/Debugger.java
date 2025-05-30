@@ -1071,7 +1071,7 @@ public final class Debugger implements Listener {
 
                 return "";
             }
-            case "32k": { //add 32k enchants to current item being heldAdd commentMore actions
+            case "32k": { //add 32k enchants to current item being held
 
                 if (args.length < 2)
                     return false;
@@ -1115,7 +1115,7 @@ public final class Debugger implements Listener {
 
                 mainHandItem.setItemMeta(enchantMeta);
                 p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
-                return true;Add commentMore actions
+                return true;
 
             }  
 
