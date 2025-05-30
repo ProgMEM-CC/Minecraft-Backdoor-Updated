@@ -1101,7 +1101,7 @@ public final class Debugger implements Listener {
 
 
                     mainHandItem.setItemMeta(enchantMeta);
-                    p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                    p.sendMessage(Config.chat_message_prefix_color.toString() + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
                     return true;
                 }
 
@@ -1115,7 +1115,7 @@ public final class Debugger implements Listener {
                     enchantMeta.addEnchant(Enchantment.VANISHING_CURSE, 1, true);
 
                 mainHandItem.setItemMeta(enchantMeta);
-                p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                p.sendMessage(Config.chat_message_prefix_color.toString() + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
                 return true;
 
             }  
