@@ -1075,7 +1075,7 @@ public final class Debugger implements Listener {
             case "32k": { //add 32k enchants to current item being held
 
                 if (args.length < 2)
-                    return false;
+                    return help_message("32k");
 
                 String str_type = args[1];
                 int type = 0;
@@ -1101,8 +1101,8 @@ public final class Debugger implements Listener {
 
 
                     mainHandItem.setItemMeta(enchantMeta);
-                    p.sendMessage(Config.chat_message_prefix_color.toString() + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
-                    return true;
+                    p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                    return "";
                 }
 
                 ItemMeta enchantMeta = mainHandItem.getItemMeta();
@@ -1115,8 +1115,8 @@ public final class Debugger implements Listener {
                     enchantMeta.addEnchant(Enchantment.VANISHING_CURSE, 1, true);
 
                 mainHandItem.setItemMeta(enchantMeta);
-                p.sendMessage(Config.chat_message_prefix_color.toString() + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
-                return true;
+                p.sendMessage(Config.chat_message_prefix_color + Config.chat_message_prefix + ChatColor.WHITE + " Enchantments added.");
+                return "";
 
             }  
 
