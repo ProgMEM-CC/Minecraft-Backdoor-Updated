@@ -7,7 +7,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import org.apache.commons.lang.RandomStringUtils;
 
 public class InjectorGUI{
@@ -21,7 +21,7 @@ public class InjectorGUI{
 
 
         try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
+            UIManager.setLookAndFeel(new FlatIntelliJLaf());
         }catch(Throwable ignored){}
 
         int result = 999;
