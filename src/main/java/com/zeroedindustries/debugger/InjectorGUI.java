@@ -28,6 +28,9 @@ public class InjectorGUI extends JDialog {
     private String discordWebhook;
     private boolean injectOther;
     private boolean warnings;
+    public void displayError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
     private int step = 0;
     private final String[] steps = {
@@ -106,10 +109,6 @@ public class InjectorGUI extends JDialog {
             this.currentStep = step;
             repaint();
         }
-        public void displayError(String message) {
-            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
 
         @Override
         protected void paintComponent(Graphics g) {
