@@ -1,7 +1,5 @@
 package com.zeroedindustries.debugger;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
@@ -15,13 +13,11 @@ import java.util.Map;
 public class InjectorGUI extends JDialog {
     private CardLayout cardLayout;
     private JPanel cardPanel;
+    private ProgressPanel progressPanel;
 
     private JButton backButton;
     private JButton nextButton;
     private JButton cancelButton;
-
-    private JComboBox<String> lafSelector;
-    private JPanel progressBar;
 
     private final Map<String, String> lookAndFeels = new LinkedHashMap<>();
 
@@ -34,43 +30,38 @@ public class InjectorGUI extends JDialog {
     private boolean warnings;
 
     private int step = 0;
-    private final int maxSteps = 7;
+    private final String[] steps = {
+            "Welcome", "Jar", "Mode", "UUIDs", "Prefix", "Discord", "Options", "Summary"
+    };
 
     public InjectorGUI(Frame owner) {
         super(owner, "Zeroed Industries Injector Wizard", true);
 
         lookAndFeels.put("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        lookAndFeels.put("Flat IntelliJ", "com.formdev.flatlaf.FlatIntelliJLaf");
-        lookAndFeels.put("System", UIManager.getSystemLookAndFeelClassName());
 
         initComponents();
+
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(600, 450);
+        setSize(700, 500);
         setLocationRelativeTo(owner);
         updateButtons();
-    }
-
-    public static void displayError(String message){
-        JOptionPane.showMessageDialog(null, message, "Zeroed Industries", JOptionPane.ERROR_MESSAGE);
     }
 
     private void initComponents() {
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        // Add panels
-        cardPanel.add(createModeSelectionPanel(), "mode"); // New step 0
-        cardPanel.add(createFileChooserPanel(), "filechooser");
+        // Add wizard step panels
+        cardPanel.add(createWelcomePanel(), "welcome");
+        cardPanel.add(createFileChooserPanel(), "jar");
+        cardPanel.add(createModePanel(), "mode");
         cardPanel.add(createUUIDsPanel(), "uuids");
         cardPanel.add(createChatPrefixPanel(), "prefix");
         cardPanel.add(createDiscordPanel(), "discord");
         cardPanel.add(createOptionsPanel(), "options");
         cardPanel.add(createSummaryPanel(), "summary");
 
-        lafSelector = new JComboBox<>(lookAndFeels.keySet().toArray(new String[0]));
-        lafSelector.setSelectedItem("Nimbus");
-        lafSelector.addActionListener(e -> onChangeLookAndFeel());
-
+        // Buttons
         backButton = new JButton("Back");
         nextButton = new JButton("Next");
         cancelButton = new JButton("Cancel");
@@ -79,76 +70,97 @@ public class InjectorGUI extends JDialog {
         nextButton.addActionListener(this::onNext);
         cancelButton.addActionListener(e -> dispose());
 
-        progressBar = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                int w = getWidth() - 40;
-                int h = getHeight();
-                int stepCount = maxSteps;
-                int radius = 12;
-                int spacing = w / (stepCount - 1);
-
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(220, 220, 220));
-                g2.fillRoundRect(20, h / 2 - 4, w, 8, 8, 8);
-
-                g2.setColor(new Color(66, 133, 244));
-                int progressWidth = spacing * step;
-                g2.fillRoundRect(20, h / 2 - 4, progressWidth, 8, 8, 8);
-
-                for (int i = 0; i < stepCount; i++) {
-                    int x = 20 + i * spacing;
-                    g2.setColor(i <= step ? new Color(66, 133, 244) : new Color(180, 180, 180));
-                    g2.fillOval(x - radius / 2, h / 2 - radius / 2, radius, radius);
-                }
-            }
-        };
-        progressBar.setPreferredSize(new Dimension(600, 30));
-
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
-
-        JPanel lafPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        lafPanel.add(new JLabel("Look & Feel: "));
-        lafPanel.add(lafSelector);
 
         JPanel navPanel = new JPanel();
         navPanel.add(backButton);
         navPanel.add(nextButton);
         navPanel.add(cancelButton);
 
-        buttonPanel.add(lafPanel, BorderLayout.WEST);
         buttonPanel.add(navPanel, BorderLayout.EAST);
 
+        progressPanel = new ProgressPanel(steps, step);
+        progressPanel.setPreferredSize(new Dimension(700, 40));
+
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(progressBar, BorderLayout.NORTH);
+        getContentPane().add(progressPanel, BorderLayout.NORTH);
         getContentPane().add(cardPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
         setLookAndFeel("Nimbus");
     }
 
-    private JPanel createModeSelectionPanel() {
-        JPanel p = new JPanel(new GridLayout(3, 1, 5, 5));
-        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+    // Custom panel for progress bar with rounded edges and circles
+    private static class ProgressPanel extends JPanel {
+        private final String[] steps;
+        private int currentStep;
 
-        JLabel title = new JLabel("Select Authentication Mode:");
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        JRadioButton uuidButton = new JRadioButton("Online mode (UUIDs)", true);
-        JRadioButton nameButton = new JRadioButton("Offline mode (Usernames)");
+        public ProgressPanel(String[] steps, int currentStep) {
+            this.steps = steps;
+            this.currentStep = currentStep;
+            setOpaque(false);
+        }
 
-        ButtonGroup group = new ButtonGroup();
-        group.add(uuidButton);
-        group.add(nameButton);
+        public void setCurrentStep(int step) {
+            this.currentStep = step;
+            repaint();
+        }
 
-        p.add(title);
-        p.add(uuidButton);
-        p.add(nameButton);
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
 
-        p.putClientProperty("uuidButton", uuidButton);
-        p.putClientProperty("nameButton", nameButton);
+            int width = getWidth();
+            int height = getHeight();
+            int stepsCount = steps.length;
+            int segment = width / stepsCount;
+
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int barHeight = 12;
+            int circleDiameter = 16;
+            int circleRadius = circleDiameter / 2;
+
+            // Draw the rounded progress bar background line
+            int lineY = height / 2 - barHeight / 2;
+
+            g2.setColor(Color.LIGHT_GRAY);
+            g2.fillRoundRect(segment / 2, lineY, segment * (stepsCount - 1), barHeight, barHeight, barHeight);
+
+            // Draw filled portion up to current step
+            g2.setColor(new Color(100, 180, 255));
+            int filledWidth = stepToX(currentStep, segment);
+            g2.fillRoundRect(segment / 2, lineY, filledWidth - segment / 2, barHeight, barHeight, barHeight);
+
+            // Draw step circles
+            for (int i = 0; i < stepsCount; i++) {
+                int centerX = i * segment + segment / 2;
+                int centerY = height / 2;
+
+                if (i <= currentStep) {
+                    g2.setColor(new Color(30, 110, 220));
+                } else {
+                    g2.setColor(Color.WHITE);
+                }
+                g2.fillOval(centerX - circleRadius, centerY - circleRadius, circleDiameter, circleDiameter);
+
+                g2.setColor(new Color(100, 180, 255));
+                g2.setStroke(new BasicStroke(2));
+                g2.drawOval(centerX - circleRadius, centerY - circleRadius, circleDiameter, circleDiameter);
+            }
+        }
+
+        private int stepToX(int step, int segment) {
+            return step * segment + segment / 2;
+        }
+    }
+
+    private JPanel createWelcomePanel() {
+        JPanel p = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("<html><h2>Welcome</h2><p>This wizard will guide you through injection setup.</p></html>", SwingConstants.CENTER);
+        p.add(label, BorderLayout.CENTER);
         return p;
     }
 
@@ -156,36 +168,58 @@ public class InjectorGUI extends JDialog {
         JPanel p = new JPanel(new BorderLayout(10, 10));
         p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JLabel label = new JLabel("Select Spigot plugin .jar file to patch:");
-        JTextField filePathField = new JTextField();
-        filePathField.setEditable(false);
-        filePathField.setPreferredSize(new Dimension(400, 25));
+        JLabel label = new JLabel("Select plugin .jar file:");
+        JTextField pathField = new JTextField(30);
+        pathField.setEditable(false);
+        pathField.setPreferredSize(new Dimension(250, 24)); // smaller input height
 
-        JButton browseBtn = new JButton("Browse...");
-        browseBtn.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            fc.setFileFilter(new FileFilter() {
+        JButton browse = new JButton("Browse...");
+        browse.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new FileFilter() {
                 public boolean accept(File f) {
                     return f.isDirectory() || f.getName().toLowerCase(Locale.ROOT).endsWith(".jar");
                 }
 
                 public String getDescription() {
-                    return "Spigot Plugin File (*.jar)";
+                    return "JAR Files (*.jar)";
                 }
             });
 
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                selectedJarFile = fc.getSelectedFile();
-                filePathField.setText(selectedJarFile.getAbsolutePath());
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                selectedJarFile = chooser.getSelectedFile();
+                pathField.setText(selectedJarFile.getAbsolutePath());
             }
         });
 
-        JPanel topPanel = new JPanel(new BorderLayout(5, 5));
-        topPanel.add(label, BorderLayout.NORTH);
-        topPanel.add(filePathField, BorderLayout.CENTER);
-        topPanel.add(browseBtn, BorderLayout.EAST);
+        JPanel inner = new JPanel(new BorderLayout(5, 5));
+        inner.add(label, BorderLayout.NORTH);
+        inner.add(pathField, BorderLayout.CENTER);
+        inner.add(browse, BorderLayout.EAST);
 
-        p.add(topPanel, BorderLayout.NORTH);
+        p.add(inner, BorderLayout.NORTH);
+        return p;
+    }
+
+    private JPanel createModePanel() {
+        JPanel p = new JPanel();
+        p.setBorder(new EmptyBorder(30, 20, 20, 20));
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+
+        JLabel label = new JLabel("Select mode of authorization:");
+        JRadioButton uuidButton = new JRadioButton("Use UUIDs (online mode)");
+        JRadioButton usernameButton = new JRadioButton("Use Usernames (offline mode)");
+
+        ButtonGroup group = new ButtonGroup();
+        group.add(uuidButton);
+        group.add(usernameButton);
+        uuidButton.setSelected(true);
+
+        p.add(label);
+        p.add(uuidButton);
+        p.add(usernameButton);
+
+        p.putClientProperty("uuidRadio", uuidButton);
         return p;
     }
 
@@ -193,14 +227,14 @@ public class InjectorGUI extends JDialog {
         JPanel p = new JPanel(new BorderLayout(10, 10));
         p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JLabel label = new JLabel("Enter UUIDs/Usernames (comma separated):");
+        JLabel label = new JLabel("UUIDs/Usernames (comma-separated):");
         JTextField input = new JTextField();
-        input.setPreferredSize(new Dimension(400, 25));
+        input.setPreferredSize(new Dimension(300, 24)); // smaller height
 
         p.add(label, BorderLayout.NORTH);
         p.add(input, BorderLayout.CENTER);
 
-        p.putClientProperty("uuidTextField", input);
+        p.putClientProperty("uuidField", input);
         return p;
     }
 
@@ -210,10 +244,11 @@ public class InjectorGUI extends JDialog {
 
         JLabel label = new JLabel("Chat Command Prefix:");
         JTextField prefixField = new JTextField("#");
-        prefixField.setPreferredSize(new Dimension(200, 25));
+        prefixField.setPreferredSize(new Dimension(100, 24)); // small input box
 
         p.add(label, BorderLayout.NORTH);
         p.add(prefixField, BorderLayout.CENTER);
+
         p.putClientProperty("prefixField", prefixField);
         return p;
     }
@@ -222,27 +257,30 @@ public class InjectorGUI extends JDialog {
         JPanel p = new JPanel(new BorderLayout(10, 10));
         p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JLabel label = new JLabel("Discord Webhook URL (leave blank to disable):");
+        JLabel label = new JLabel("Discord Webhook URL (optional):");
         JTextField discordField = new JTextField();
-        discordField.setPreferredSize(new Dimension(400, 25));
+        discordField.setPreferredSize(new Dimension(400, 24)); // small input box
 
         p.add(label, BorderLayout.NORTH);
         p.add(discordField, BorderLayout.CENTER);
+
         p.putClientProperty("discordField", discordField);
         return p;
     }
 
     private JPanel createOptionsPanel() {
-        JPanel p = new JPanel(new GridLayout(2, 1));
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JCheckBox injectOtherCheck = new JCheckBox("Inject to other plugins? (Experimental)");
-        JCheckBox warningsCheck = new JCheckBox("Enable Debug Messages?");
+        JCheckBox injectCheck = new JCheckBox("Inject to other plugins (experimental)");
+        JCheckBox debugCheck = new JCheckBox("Enable debug messages");
 
-        p.add(injectOtherCheck);
-        p.add(warningsCheck);
-        p.putClientProperty("injectOtherCheck", injectOtherCheck);
-        p.putClientProperty("warningsCheck", warningsCheck);
+        p.add(injectCheck);
+        p.add(debugCheck);
+
+        p.putClientProperty("injectCheck", injectCheck);
+        p.putClientProperty("debugCheck", debugCheck);
         return p;
     }
 
@@ -250,14 +288,79 @@ public class InjectorGUI extends JDialog {
         JPanel p = new JPanel(new BorderLayout(10, 10));
         p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JTextArea summaryArea = new JTextArea();
-        summaryArea.setEditable(false);
-        summaryArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JTextArea summary = new JTextArea();
+        summary.setEditable(false);
+        summary.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
         p.add(new JLabel("Summary:"), BorderLayout.NORTH);
-        p.add(new JScrollPane(summaryArea), BorderLayout.CENTER);
-        p.putClientProperty("summaryArea", summaryArea);
+        p.add(new JScrollPane(summary), BorderLayout.CENTER);
+
+        p.putClientProperty("summaryArea", summary);
         return p;
+    }
+
+    private void updateStepData() {
+        switch (step) {
+            case 2:
+                JPanel modePanel = (JPanel) cardPanel.getComponent(2);
+                JRadioButton uuidRadio = (JRadioButton) modePanel.getClientProperty("uuidRadio");
+                useUsernames = !uuidRadio.isSelected();
+                break;
+            case 3:
+                JPanel uuidPanel = (JPanel) cardPanel.getComponent(3);
+                JTextField uuidField = (JTextField) uuidPanel.getClientProperty("uuidField");
+                minecraftUUIDs = uuidField.getText().trim();
+                break;
+            case 4:
+                JPanel prefixPanel = (JPanel) cardPanel.getComponent(4);
+                JTextField prefix = (JTextField) prefixPanel.getClientProperty("prefixField");
+                chatPrefix = prefix.getText().trim();
+                break;
+            case 5:
+                JPanel discordPanel = (JPanel) cardPanel.getComponent(5);
+                JTextField discord = (JTextField) discordPanel.getClientProperty("discordField");
+                discordWebhook = discord.getText().trim();
+                break;
+            case 6:
+                JPanel optionPanel = (JPanel) cardPanel.getComponent(6);
+                JCheckBox injectCheck = (JCheckBox) optionPanel.getClientProperty("injectCheck");
+                JCheckBox debugCheck = (JCheckBox) optionPanel.getClientProperty("debugCheck");
+                injectOther = injectCheck.isSelected();
+                warnings = debugCheck.isSelected();
+                break;
+        }
+    }
+
+    private void updateSummary() {
+        JPanel summaryPanel = (JPanel) cardPanel.getComponent(7);
+        JTextArea area = (JTextArea) summaryPanel.getClientProperty("summaryArea");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("File: ").append(selectedJarFile != null ? selectedJarFile.getAbsolutePath() : "None").append("\n");
+        sb.append("Use Usernames: ").append(useUsernames).append("\n");
+        sb.append("UUIDs/Usernames: ").append(minecraftUUIDs).append("\n");
+        sb.append("Prefix: ").append(chatPrefix).append("\n");
+        sb.append("Discord Webhook: ").append(discordWebhook.isEmpty() ? "(none)" : discordWebhook).append("\n");
+        sb.append("Inject to others: ").append(injectOther).append("\n");
+        sb.append("Debug: ").append(warnings);
+
+        area.setText(sb.toString());
+    }
+
+    private boolean validateCurrentStep() {
+        if (step == 1 && (selectedJarFile == null || !selectedJarFile.exists())) {
+            JOptionPane.showMessageDialog(this, "Please select a valid .jar file.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (step == 4) {
+            JPanel prefixPanel = (JPanel) cardPanel.getComponent(4);
+            JTextField prefix = (JTextField) prefixPanel.getClientProperty("prefixField");
+            if (prefix.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Prefix is required.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return true;
     }
 
     private void onBack(ActionEvent e) {
@@ -265,112 +368,40 @@ public class InjectorGUI extends JDialog {
             step--;
             cardLayout.previous(cardPanel);
             updateButtons();
-            progressBar.repaint();
+            progressPanel.setCurrentStep(step);
         }
     }
 
     private void onNext(ActionEvent e) {
         if (!validateCurrentStep()) return;
-
         updateStepData();
-        if (step < maxSteps - 1) {
+
+        if (step < steps.length - 1) {
             step++;
             cardLayout.next(cardPanel);
-            updateButtons();
-            progressBar.repaint();
-            if (step == maxSteps - 1) updateSummary();
+            if (step == steps.length - 1) updateSummary();
         } else {
-            performInjection();
+            JOptionPane.showMessageDialog(this, "Injection would begin now.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
         }
+
+        updateButtons();
+        progressPanel.setCurrentStep(step);
     }
 
     private void updateButtons() {
         backButton.setEnabled(step > 0);
-        nextButton.setText(step == maxSteps - 1 ? "Finish" : "Next");
-    }
-
-    private void updateStepData() {
-        switch (step) {
-            case 0: 
-                JPanel p = (JPanel) cardPanel.getComponent(0);
-                useUsernames = ((JRadioButton) p.getClientProperty("nameButton")).isSelected();
-                break;
-            case 2:
-                JPanel p = (JPanel) cardPanel.getComponent(2);
-                JTextField t = (JTextField) p.getClientProperty("uuidTextField");
-                minecraftUUIDs = t.getText().trim();
-                break;
-            case 3:
-                JPanel p = (JPanel) cardPanel.getComponent(3);
-                JTextField t = (JTextField) p.getClientProperty("prefixField");
-                chatPrefix = t.getText().trim();
-                break;
-            case 4:
-                JPanel p = (JPanel) cardPanel.getComponent(4);
-                JTextField t = (JTextField) p.getClientProperty("discordField");
-                discordWebhook = t.getText().trim();
-                break;
-            case 5:
-                JPanel p = (JPanel) cardPanel.getComponent(5);
-                injectOther = ((JCheckBox) p.getClientProperty("injectOtherCheck")).isSelected();
-                warnings = ((JCheckBox) p.getClientProperty("warningsCheck")).isSelected();
-                break;
-        }
-    }
-
-    private boolean validateCurrentStep() {
-        if (step == 1 && (selectedJarFile == null || !selectedJarFile.exists())) {
-            JOptionPane.showMessageDialog(this, "Please select a valid .jar file to patch.", "Input Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        if (step == 3) {
-            JPanel p = (JPanel) cardPanel.getComponent(3);
-            JTextField prefixField = (JTextField) p.getClientProperty("prefixField");
-            if (prefixField.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Chat Command Prefix cannot be empty.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void updateSummary() {
-        JPanel p = (JPanel) cardPanel.getComponent(6);
-        JTextArea area = (JTextArea) p.getClientProperty("summaryArea");
-        area.setText(
-                "File to patch: " + (selectedJarFile == null ? "None" : selectedJarFile.getAbsolutePath()) + "\n" +
-                        "Offline mode: " + useUsernames + "\n" +
-                        "UUIDs/Usernames: " + (minecraftUUIDs == null || minecraftUUIDs.isEmpty() ? "(none)" : minecraftUUIDs) + "\n" +
-                        "Chat Prefix: " + chatPrefix + "\n" +
-                        "Discord Webhook: " + (discordWebhook.isEmpty() ? "(none)" : discordWebhook) + "\n" +
-                        "Inject to others: " + injectOther + "\n" +
-                        "Debug messages: " + warnings + "\n"
-        );
-    }
-
-    private void performInjection() {
-        JOptionPane.showMessageDialog(this, "Injection process would start now.\n(Not implemented yet)", "Info", JOptionPane.INFORMATION_MESSAGE);
-        dispose();
-    }
-
-    private void onChangeLookAndFeel() {
-        String selected = (String) lafSelector.getSelectedItem();
-        if (selected != null) setLookAndFeel(selected);
+        nextButton.setText(step == steps.length - 1 ? "Finish" : "Next");
     }
 
     private void setLookAndFeel(String name) {
-        String lafClass = lookAndFeels.get(name);
-        if (lafClass == null) return;
-
+        String laf = lookAndFeels.get(name);
         try {
-            if ("System".equals(name)) {
-                lafClass = UIManager.getSystemLookAndFeelClassName();
-            }
-            UIManager.setLookAndFeel(lafClass);
+            UIManager.setLookAndFeel(laf);
             SwingUtilities.updateComponentTreeUI(this);
             pack();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to set Look & Feel: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Failed to set LAF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -379,6 +410,9 @@ public class InjectorGUI extends JDialog {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception ignored) {}
 
-        SwingUtilities.invokeLater(() -> new InjectorGUI(null).setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            InjectorGUI gui = new InjectorGUI(null);
+            gui.setVisible(true);
+        });
     }
 }
