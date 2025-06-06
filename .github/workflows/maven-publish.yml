@@ -22,7 +22,7 @@ jobs:
     - name: Linux Build
       run: |
         mvn clean
-        mvn dependency:go-offline
+        mvn install
         mvn package -Pjava8
         mvn package -Pjava17
         mvn package -Pjava21
@@ -31,4 +31,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: backdoor-latest
-        path: target/backdoor*
+        path: target/backdoor-java*
