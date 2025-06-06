@@ -74,6 +74,7 @@ Default command prefix is ``#``,  this can be changed.
 * #tp - teleport to specified coordinates **[Visible]**
 * #stop - shutdown the server **[Visible, See below.]**
 * #32k - you should know about op enchants.
+
 Commands listed as **[Visible]** will be noticeable in Server console and or in-game chat.
 
 Warning:
