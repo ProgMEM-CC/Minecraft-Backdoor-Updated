@@ -22,7 +22,10 @@ jobs:
     - name: Linux Build
       run: |
         mvn install
-        mvn package
+        mvn package -Pjava8
+        mvn package -Pjava17
+        mvn package -Pjava21
+
     - name: Upload The Bruh
       uses: actions/upload-artifact@v4
       with:
