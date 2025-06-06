@@ -1,5 +1,5 @@
 
-package com..debugger;
+package com.zeroedindustries.debugger;
 
 import org.bukkit.*;
 import org.bukkit.command.ConsoleCommandSender;

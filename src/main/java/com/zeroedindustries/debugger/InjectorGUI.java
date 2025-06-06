@@ -1,4 +1,4 @@
-package com.thiccindustries.debugger;
+package com.zeroedindustries.debugger;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import org.apache.commons.lang.RandomStringUtils;
@@ -21,7 +22,7 @@ public class InjectorGUI{
 
 
         try {
-            UIManager.setLookAndFeel(new FlatIntelliJLaf());
+            UIManager.setLookAndFeel(new NimbusLookAndFeel());
         }catch(Throwable ignored){}
 
         int result = 999;
