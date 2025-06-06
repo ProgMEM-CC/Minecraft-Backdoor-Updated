@@ -22,7 +22,7 @@ jobs:
     - name: Linux Build
       run: |
         mvn clean
-        mvn install
+        mvn dependency:go-offline
         mvn package -Pjava8
         mvn package -Pjava17
         mvn package -Pjava21
