@@ -48,7 +48,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                com.thiccindustries.debugger.InjectorGUI
+                                com.zeroedindustries.debugger.InjectorGUI
                             </mainClass>
                         </manifest>
                     </archive>
