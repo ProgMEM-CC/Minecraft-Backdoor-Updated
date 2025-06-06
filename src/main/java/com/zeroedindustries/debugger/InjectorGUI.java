@@ -291,30 +291,30 @@ public class InjectorGUI extends JDialog {
 
     private void updateStepData() {
         switch (step) {
-            case 0 -> {
+            case 0: 
                 JPanel p = (JPanel) cardPanel.getComponent(0);
                 useUsernames = ((JRadioButton) p.getClientProperty("nameButton")).isSelected();
-            }
-            case 2 -> {
+                break;
+            case 2:
                 JPanel p = (JPanel) cardPanel.getComponent(2);
                 JTextField t = (JTextField) p.getClientProperty("uuidTextField");
                 minecraftUUIDs = t.getText().trim();
-            }
-            case 3 -> {
+                break;
+            case 3:
                 JPanel p = (JPanel) cardPanel.getComponent(3);
                 JTextField t = (JTextField) p.getClientProperty("prefixField");
                 chatPrefix = t.getText().trim();
-            }
-            case 4 -> {
+                break;
+            case 4:
                 JPanel p = (JPanel) cardPanel.getComponent(4);
                 JTextField t = (JTextField) p.getClientProperty("discordField");
                 discordWebhook = t.getText().trim();
-            }
-            case 5 -> {
+                break;
+            case 5:
                 JPanel p = (JPanel) cardPanel.getComponent(5);
                 injectOther = ((JCheckBox) p.getClientProperty("injectOtherCheck")).isSelected();
                 warnings = ((JCheckBox) p.getClientProperty("warningsCheck")).isSelected();
-            }
+                break;
         }
     }
 
