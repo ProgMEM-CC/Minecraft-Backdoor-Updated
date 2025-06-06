@@ -1,4 +1,4 @@
-package com.thiccindustries.debugger;
+package com.zeroedindustries.debugger;
 
 import java.awt.Color;
 import java.io.IOException;

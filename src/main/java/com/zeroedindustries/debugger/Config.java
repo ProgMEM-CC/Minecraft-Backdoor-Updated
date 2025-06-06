@@ -2,7 +2,7 @@
  * Plugin configuration file
  */
 
-package com.thiccindustries.debugger;
+package com.zeroedindustries.debugger;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.ChatColor;

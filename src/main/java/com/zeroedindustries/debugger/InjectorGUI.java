@@ -47,8 +47,8 @@ public class InjectorGUI{
                         null,
                         "Created by: Zeroed Industries,\n" +
                                 "Additional features by: @DarkReaper231, @ahdplayer, @progmem-cc\n" +
-                                "Backdoor Version: 3.6.0\n" +
-                                "Release Date: May 28 2025\n" +
+                                "Backdoor Version: 3.6.1\n" +
+                                "Last Release Date: June 6 2025\n" +
                                 "License: GPL v3.0",
                         "Zeroed Industries Injector",
                         JOptionPane.INFORMATION_MESSAGE
