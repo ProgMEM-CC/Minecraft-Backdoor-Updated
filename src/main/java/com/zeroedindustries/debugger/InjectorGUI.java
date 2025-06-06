@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class InjectorWizard extends JDialog {
+public class InjectorGUI extends JDialog {
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
@@ -37,7 +37,7 @@ public class InjectorWizard extends JDialog {
     // Current step index
     private int step = 0;
 
-    public InjectorWizard(Frame owner) {
+    public InjectorGUI(Frame owner) {
         super(owner, "Zeroed Industries Injector Wizard", true);
 
         // Setup the configurable LAF map here:
@@ -392,7 +392,7 @@ public class InjectorWizard extends JDialog {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
-            InjectorWizard wizard = new InjectorWizard(null);
+            InjectorGUI wizard = new InjectorGUI(null);
             wizard.setVisible(true);
         });
     }
