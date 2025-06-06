@@ -135,7 +135,7 @@
                 <java.version>1.8</java.version>
             </properties>
             <build>
-                <finalName>${project.artifactId}-java8</finalName>
+                <finalName>${project.artifactId}-java8-${project.version}</finalName>
             </build>
         </profile>
 
@@ -145,7 +145,7 @@
                 <java.version>17.0.13</java.version>
             </properties>
             <build>
-                <finalName>${project.artifactId}-java17</finalName>
+                <finalName>${project.artifactId}-java17-${project.version}</finalName>
             </build>
         </profile>
 
@@ -155,7 +155,7 @@
                 <java.version>21.0.3</java.version>
             </properties>
             <build>
-                <finalName>${project.artifactId}-java21</finalName>
+                <finalName>${project.artifactId}-java21-${project.version}</finalName>
             </build>
         </profile>
     </profiles>
