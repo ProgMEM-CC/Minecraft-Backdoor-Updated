@@ -28,7 +28,7 @@ public class InjectorGUI extends JDialog {
     private String discordWebhook;
     private boolean injectOther;
     private boolean warnings;
-    public void displayError(String message) {
+    public static void displayError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
