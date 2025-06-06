@@ -21,6 +21,7 @@ jobs:
  
     - name: Linux Build
       run: |
+        mvn clean
         mvn install
         mvn package -Pjava8
         mvn package -Pjava17
