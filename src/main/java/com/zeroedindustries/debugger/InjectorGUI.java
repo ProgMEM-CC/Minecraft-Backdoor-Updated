@@ -106,6 +106,10 @@ public class InjectorGUI extends JDialog {
             this.currentStep = step;
             repaint();
         }
+        public void displayError(String message) {
+            JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
 
         @Override
         protected void paintComponent(Graphics g) {
