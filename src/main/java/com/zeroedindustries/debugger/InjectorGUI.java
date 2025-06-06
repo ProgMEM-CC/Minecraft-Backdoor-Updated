@@ -51,7 +51,9 @@ public class InjectorGUI extends JDialog {
         setLocationRelativeTo(owner);
         updateButtons();
     }
-
+    public static void displayError(String message){
+        JOptionPane.showMessageDialog(null, message, "Zeroed Industries", JOptionPane.ERROR_MESSAGE);
+    }
     private void initComponents() {
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
