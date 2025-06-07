@@ -85,6 +85,21 @@ public class InjectorGUI extends JDialog {
         navPanel.add(cancelButton);
 
         buttonPanel.add(navPanel, BorderLayout.EAST);
+        // --- LAF Dropdown (bottom-left) ---
+        JPanel lafPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel lafLabel = new JLabel("Theme:");
+        JComboBox<String> lafDropdown = new JComboBox<>(lookAndFeels.keySet().toArray(new String[0]));
+        lafDropdown.setSelectedItem("Nimbus");
+
+        lafDropdown.addActionListener(e -> {
+            String selected = (String) lafDropdown.getSelectedItem();
+            setLookAndFeel(selected);
+        });
+
+        lafPanel.add(lafLabel);
+        lafPanel.add(lafDropdown);
+        buttonPanel.add(lafPanel, BorderLayout.WEST); // <== this line attaches it to the left
+
 
         progressPanel = new ProgressPanel(steps, step);
         progressPanel.setPreferredSize(new Dimension(700, 40));
@@ -93,8 +108,6 @@ public class InjectorGUI extends JDialog {
         getContentPane().add(progressPanel, BorderLayout.NORTH);
         getContentPane().add(cardPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
-        setLookAndFeel("Nimbus");
     }
 
     // Custom panel for progress bar with rounded edges and circles
