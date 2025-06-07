@@ -29,7 +29,7 @@ public class InjectorGUI extends JDialog {
     private boolean injectOther;
     private boolean warnings;
     public static void displayError(String message) {
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     private int step = 0;
@@ -41,6 +41,9 @@ public class InjectorGUI extends JDialog {
         super(owner, "Zeroed Industries Injector Wizard", true);
 
         lookAndFeels.put("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        lookAndFeels.put("MetalUI", "javax.swing.plaf.metal.MetalLookAndFeel");
+        lookAndFeels.put("Solarized Light","com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme");
+        lookAndFeels.put("Cobalt 2","com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme");
 
         initComponents();
 
