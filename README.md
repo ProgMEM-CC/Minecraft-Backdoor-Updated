@@ -7,9 +7,8 @@ Spreading to other plugins DOES NOT WORK atm, eta is unknown
 
 A silent, spreading backdoor for Minecraft Bukkit/Spigot/Paper servers.
 Using the injector is recommended, should you choose to manually backdoor a plugin, you're on your own if you run into problems.
-Injecting does not work as of right now, attempting to make the backdoor spread will just render the plugin and therfore the backdoor not run
-
-For educational purposes only. Do not use on a server you do not own.
+DONT TICK THE SPREAD BUTTON AS OF NOW IT IS BROKEN AND WILL RENDER THE PLUGIN UNUSABLE
+Spreading does not work as of right now, attempting to make the backdoor spread will just render the plugin and therfore the backdoor not run
 
 ## Requirements:
 * Java 8 runtime. (Newer may work)
