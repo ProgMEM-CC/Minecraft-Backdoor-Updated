@@ -52,6 +52,7 @@ public class InjectorGUI extends JDialog {
         lookAndFeels.put("Solarized Light", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme");
         lookAndFeels.put("Cobalt 2", "com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme");
         lookAndFeels.put("OrangeArc","com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme");
+        lookAndFeels.put("Napkin","net.sf.squirrel-sql.thirdparty-non-maven.napkinlaf.NapkinLookAndFeel");
         initComponents();
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
